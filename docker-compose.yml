@@ -1,0 +1,42 @@
+version: '3.6'
+services:
+  database:
+    image: postgres
+    container_name: scb-database
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    networks:
+      - db-backend
+  
+  backend:
+    build: ./backend
+    image: scb-backend-image
+    container_name: scb-backend
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/scb
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - 8090:8090
+    depends_on:
+      - database
+    networks:
+      - db-backend
+      - frontend-backend
+
+  frontend:
+    build: ./front
+    image: scb-frontend-image
+    container_name: scb-frontend
+    ports:
+      - 8080:8080
+    depends_on:
+      - backend
+    networks: 
+      - frontend-backend
+  
+networks:
+  db-backend: {}
+  frontend-backend: {}
